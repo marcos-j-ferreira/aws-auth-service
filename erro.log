@@ -1,0 +1,13 @@
+------                                                                                                                                                
+ > [builder 6/6] RUN go build -o main .:
+0.382 no Go files in /app
+------
+Dockerfile:13
+--------------------
+  11 |     # Copia o restante do código e constrói o binário
+  12 |     COPY . .
+  13 | >>> RUN go build -o main .
+  14 |     
+  15 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c go build -o main ." did not complete successfully: exit code: 1
