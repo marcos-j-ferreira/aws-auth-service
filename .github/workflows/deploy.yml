@@ -1,0 +1,49 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      #  Faz o checkout do código
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Configura as credenciais AWS (essas chaves são do usuário 'git-actions')
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Faz o build da imagem Docker (sem ainda enviar)
+      - name: Build Docker image
+        run: |
+          docker build -t back-end/api:latest .
+
+      # Testa o container localmente (opcional, mas muito útil)
+      - name: Test container
+        run: |
+          docker run --rm -d -p 8080:8080 --name test-api back-end/api:latest
+          sleep 3
+          docker ps | grep test-api
+          docker logs test-api
+          docker stop test-api
+
+      #  Login no ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_USER_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+      #  Tag e push da imagem para o repositório
+      - name: Push image to Amazon ECR
+        run: |
+          docker tag back-end/api:latest 1234567890.dkr.ecr.us-east-1.amazonaws.com/back-end/api:latest
+          docker push 1234567890.dkr.ecr.us-east-1.amazonaws.com/back-end/api:latest
