@@ -3,7 +3,7 @@ name: Auto Merge test -> master
 on:
   push:
     branches:
-      - test/api:
+      - 'test/**'
 
 jobs:
   merge:
@@ -18,7 +18,7 @@ jobs:
       - name: Configurar Git
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.gihub.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
       
       - name: Merge test -> master
         run: |
