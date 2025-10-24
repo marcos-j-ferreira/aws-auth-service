@@ -1,9 +1,25 @@
+#name: Build and Push to ECR
+
+#on:
+#  push:
+#    branches:
+#      - master
+
 name: Build and Push to ECR
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: ["CI e Auto Merge test -> master"]
+    types:
+      - completed
+
+jobs:
+  build-and-push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      # ... (todo o resto igual)
+      
 
 jobs:
   build-and-push:
@@ -45,5 +61,5 @@ jobs:
       #  Tag e push da imagem para o repositório
       - name: Push image to Amazon ECR
         run: |
-          docker tag back-end/api:latest 1234567890.dkr.ecr.us-east-1.amazonaws.com/back-end/api:latest
-          docker push 1234567890.dkr.ecr.us-east-1.amazonaws.com/back-end/api:latest
+          docker tag back-end/api:latest ${{ secrets.AWS_USER_ID }}.dkr.ecr.us-east-1.amazonaws.com/back-end/api:latest
+          docker push ${{ secrets.AWS_USER_ID }}.dkr.ecr.us-east-1.amazonaws.com/back-end/api:latest
