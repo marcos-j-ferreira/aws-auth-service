@@ -9,3 +9,7 @@ import (
 func HandlerHello(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"mensagem":"Hello, world!!"})
 }
+
+func HandlerOla(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"mensagem":"Olá mundo!!"})
+}

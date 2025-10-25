@@ -15,6 +15,7 @@ func main() {
 	r.Use(gin.Recovery())
 
 	r.GET("/", handler.HandlerHello)
+	r.GET("/ola", handler.HandlerOla)
 
 	fmt.Println("Servidor ouvindo na porta 8080...")
 
