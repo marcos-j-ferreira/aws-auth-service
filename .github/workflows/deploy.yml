@@ -17,13 +17,6 @@ jobs:
   build-and-push:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    steps:
-      # ... (todo o resto igual)
-      
-
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
 
     steps:
       #  Faz o checkout do código
