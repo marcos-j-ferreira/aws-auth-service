@@ -1,24 +1,25 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"ci/cd/internal/handler"
+	//"github.com/gin-gonic/gin"
+	"ci/cd/internal/routes"
+	//"ci/cd/internal/handler"
 	"fmt"
 )
 
 
 func main() {
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 
-	r := gin.New()
+	router := routes.SetupRouter()
 
-	r.Use(gin.Recovery())
-
-	r.GET("/", handler.HandlerHello)
-	r.GET("/ola", handler.HandlerOla)
-	r.GET("/deploy", handler.HandlerTesteDeploy)
+	//r := gin.New()
+	//router.Use(gin.Recovery())
+	//router.GET("/", handler.HandlerHello)
+	//router.GET("/ola", handler.HandlerOla)
+	//router.GET("/deploy", handler.HandlerTesteDeploy)
 
 	fmt.Println("Servidor ouvindo na porta 8080...")
 
-	r.Run(":8080")
+	router.Run(":8080")
 }
