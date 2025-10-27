@@ -1,150 +1,121 @@
-s🚀 Autodeploy Automatizado: GitOps com GitHub Actions e AWS
+# Autodeploy Automatizado: GitOps com GitHub Actions e AWS
 
-Este documento descreve o fluxo de integração contínua (CI) e entrega contínua (CD) que garante que o código seja testado, empacotado e implantado automaticamente na infraestrutura AWS.
+Este documento descreve o fluxo de **integração contínua (CI)** e **entrega contínua (CD)** utilizado para garantir que o código seja testado, empacotado e implantado automaticamente na infraestrutura AWS.
 
-1. Estratégia de Branching (Git Flow Simplificado)
+---
 
-Adotamos um modelo de três branches principais, garantindo que o código passe por estágios de validação obrigatórios.
+## 1. Estratégia de Branching (Git Flow Simplificado)
 
-Branch
+O projeto adota um modelo de **três branches principais**, garantindo que o código passe por estágios obrigatórios de validação antes de chegar à produção.
 
-Propósito
+| **Branch** | **Propósito**                                                     | **Regra de Uso**                              |
+| ---------- | ----------------------------------------------------------------- | --------------------------------------------- |
+| `dev`      | Desenvolvimento ativo e funcionalidades em andamento.             | Única branch com commits diretos.             |
+| `test`     | Ambiente de integração e execução de testes unitários/funcionais. | Recebe apenas *merges* da `dev`.              |
+| `master`   | Código pronto para produção (base para imagem Docker).            | Recebe apenas *merges automáticos* da `test`. |
 
-Regra
+---
 
-dev
+## 2. Pipeline de Integração Contínua (CI) – GitHub Actions
 
-Desenvolvimento ativo e funcionalidades em andamento.
+O processo de CI é iniciado automaticamente quando ocorre um **merge da branch `dev` para `test`**.
 
-Única branch para commits diretos.
+### Etapas do Pipeline
 
-test
+| **Etapa**                         | **Ação**                                                                                            | **Resultado em caso de sucesso**       |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| 1. Testes de Unidade e Integração | Executa o pacote completo de testes da aplicação.                                                   | Pipeline prossegue.                    |
+| 2. Merge Automático (CD)          | Se todos os testes passarem, o GitHub Actions realiza automaticamente o merge de `test` → `master`. | Código testado disponível na `master`. |
+| 3. Build e Containerização        | A partir da `master`, o código é construído e empacotado em uma imagem Docker.                      | Imagem Docker gerada localmente.       |
+| 4. Teste em Container             | O container é iniciado em ambiente isolado para validação final.                                    | Container validado.                    |
+| 5. Push para AWS ECR              | A imagem final é tagueada e enviada ao **AWS Elastic Container Registry (ECR)**.                    | Imagem disponível na AWS para deploy.  |
 
-Ambiente de integração e execução dos testes de unidade/funcionais.
+---
 
-Recebe apenas merges da dev.
+## 3. Fluxo de Entrega Contínua (CD) na AWS
 
-master
+Após o envio da imagem para o ECR, inicia-se automaticamente o processo de **deploy** na infraestrutura AWS.
 
-Código pronto para produção (fonte da imagem do Docker).
+### Etapas do Fluxo
 
-Recebe apenas merges automáticos da test.
+1. **Gatilho do EventBridge**
 
-2. Pipeline de Integração Contínua (CI) via GitHub Actions
+   * O envio de uma nova imagem para o ECR gera um evento.
+   * O **AWS EventBridge** está configurado para capturar este evento de *push*.
 
-O gatilho de todo o processo de CI é o merge da branch dev para a branch test.
+2. **Invocação da Lambda**
 
-Etapas do GitHub Actions:
+   * O EventBridge invoca uma função **AWS Lambda** previamente configurada.
 
-Etapa
+3. **Acionamento da Rota de Deploy (EC2)**
 
-Ação
+   * A função Lambda faz uma requisição HTTP (GET) para uma rota de API hospedada na instância **EC2**.
 
-Resultado em Sucesso
+4. **Deploy na EC2**
+   A API na EC2 executa o script de deploy:
 
-1. Testes de Unidade/Integração
+   * Faz o **pull da imagem mais recente** do ECR.
+   * **Interrompe** o container antigo (se existir).
+   * **Inicia** o novo container com a imagem atualizada.
 
-Execução completa do pacote de testes da aplicação.
+O resultado é uma **implantação automatizada e validada**, sem necessidade de intervenção manual.
 
-O pipeline continua.
+---
 
-2. Merge Automático (CD)
+## 4. Diagrama do Fluxo Completo (ASCII)
 
-Se todos os testes passarem, o GitHub Actions realiza automaticamente o merge de test para master.
-
-O código testado está agora na master.
-
-3. Build & Containerização
-
-A partir da branch master, o código é construído e empacotado em uma imagem Docker.
-
-Imagem Docker local criada.
-
-4. Teste em Container
-
-O container é iniciado em ambiente isolado para validação final.
-
-Container validado.
-
-5. Push para AWS ECR
-
-A imagem Docker final é tagueada e enviada para o AWS Elastic Container Registry (ECR).
-
-Imagem disponível na AWS para deploy.
-
-3. Fluxo de Entrega Contínua (CD) na AWS
-
-Uma vez que a imagem é enviada com sucesso para o ECR, o fluxo de deployment é acionado na infraestrutura AWS.
-
-Gatilho do EventBridge: O push da nova imagem para o ECR gera um evento. O AWS EventBridge está configurado para capturar esse evento específico (mudança de estado no repositório ECR).
-
-Invocação da Lambda: O EventBridge, ao detectar o novo evento, invoca uma função AWS Lambda pré-configurada.
-
-Acionamento da Rota de Deploy: A função Lambda executa um código que faz uma chamada HTTP (via POST ou similar) para uma rota de API específica que está sendo executada na instância EC2.
-
-Deploy na EC2: A API na EC2, ao receber a chamada, executa o script de deploy:
-
-Faz o pull da imagem mais recente do ECR.
-
-Para o container antigo (se houver).
-
-Inicia o novo container com a imagem atualizada.
-
-🖼️ Fluxo Completo em ASCII
-
+```
 [Desenvolvedor]
        |
-       V
+       v
   +----------+
-  |  Commit  | <----- APENAS NA
-  | (Branch) |           DEV
-  +----------+
-       |
-       V (PR / Merge)
-  +----------+
-  | Merge p/ |
-  |   `dev`  |
+  |  Commit  |   <- apenas na branch `dev`
   +----------+
        |
-       V
-  +-------------------------------------------------+
-  |      [ CI/CD: GitHub Actions (Pipeline) ]       |
-  +-------------------------------------------------+
+       v
+  +-----------------------------+
+  | Merge: dev -> test (gatilho)|
+  +-----------------------------+
        |
-       +--> 1. Rodar Testes (Unitários/Integração)
+       v
+  +--------------------------------------------------+
+  |      [ CI/CD: GitHub Actions - Pipeline ]        |
+  +--------------------------------------------------+
        |
-       +--> 2. SE SUCESSO: Merge Automático `test` -> `master`
+       +--> 1. Executar Testes (Unitários/Integração)
        |
-       +--> 3. Build & Teste em Container (usando `master`)
+       +--> 2. Se sucesso: Merge automático test -> master
        |
-       +--> 4. Push da Imagem
-  +-------------------------------------------------+
+       +--> 3. Build & Teste em Container (base master)
        |
-       V (Notificação de Nova Imagem)
-  +-------------------------------------------------+
-  |                [ AWS ECR ]                      |
-  |                (Imagem Salva)                   |
-  +-------------------------------------------------+
+       +--> 4. Push da Imagem Docker p/ AWS ECR
        |
-       V (Evento: Imagem Pushed)
-  +-------------------------------------------------+
-  |              [ AWS EventBridge ]                |
-  |           (Gatilho: ECR Push)                   |
-  +-------------------------------------------------+
+       v
+  +--------------------------------------------------+
+  |                 [ AWS ECR ]                      |
+  |        (Imagem armazenada e versionada)          |
+  +--------------------------------------------------+
        |
-       V (Invocação)
-  +-------------------------------------------------+
-  |              [ AWS Lambda ]                     |
-  |           (Chama API da EC2)                    |
-  +-------------------------------------------------+
+       v
+  +--------------------------------------------------+
+  |              [ AWS EventBridge ]                 |
+  |       (Detecta evento de push no ECR)            |
+  +--------------------------------------------------+
        |
-       V (Chamada HTTP p/ Rota de Deploy)
-  +-------------------------------------------------+
-  |        [ AWS EC2 - API de Deploy ]              |
-  |  - Pull da Imagem (ECR)                         |
-  |  - Parar/Remover Container Antigo                |
-  |  - Rodar Container Novo                          |
-  +-------------------------------------------------+
+       v
+  +--------------------------------------------------+
+  |                [ AWS Lambda ]                    |
+  |     (Invoca API de Deploy na instância EC2)      |
+  +--------------------------------------------------+
        |
-       V
-    [ Aplicação Atualizada e Rodando ]
+       v
+  +--------------------------------------------------+
+  |           [ AWS EC2 - API de Deploy ]            |
+  |   - Pull da nova imagem                          |
+  |   - Parada/remoção do container anterior          |
+  |   - Execução do container atualizado              |
+  +--------------------------------------------------+
+       |
+       v
+     [ Aplicação Atualizada e em Execução ]
+```
