@@ -16,14 +16,14 @@ func SetupRouter() *gin.Engine {
 			"http://13.218.89.228",
 			"http://13.218.89.228:8080",
 
-			"http://localhost",
-			"http://localhost:8080",
-			"http://192.168.1.111:80/index.html",
+			//"http://localhost",
+			//"http://localhost:8080",
+			//"http://192.168.1.111:80/index.html",
 
-			"http://127.0.0.1:3000",    /// unica que funcionou
+			//"http://127.0.0.1:3000",    /// unica que funcionou
 			
-			"http://192.168.1.111:5500", 
-			"http://192.168.1.111:3000",  
+			//"http://192.168.1.111:5500", 
+			//"http://192.168.1.111:3000",  
 			 },
 		AllowMethods:		[]string{"GET","POST","PUT","DELETE", "OPTIONS"},
 		AllowHeaders:		[]string{"Origin", "Content-Type", "Authorization"},
