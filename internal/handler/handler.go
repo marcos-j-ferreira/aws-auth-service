@@ -13,3 +13,7 @@ func HandlerHello(c *gin.Context){
 func HandlerOla(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"mensagem":"Olá mundo!!"})
 }
+
+func HandlerTesteDeploy(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"mensagem":"Deploy está funcionando com sucesso"})
+}

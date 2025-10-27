@@ -16,6 +16,7 @@ func main() {
 
 	r.GET("/", handler.HandlerHello)
 	r.GET("/ola", handler.HandlerOla)
+	r.GET("/deploy", handler.HandlerTesteDeploy)
 
 	fmt.Println("Servidor ouvindo na porta 8080...")
 
