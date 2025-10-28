@@ -35,7 +35,7 @@ func Init_Connection_db() {
 	//	host, port, user, password, dbname,
 	//)
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=verify-full TimeZone=America/Sao_Paulo", host, user, password, dbname, port)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=America/Sao_Paulo", host, user, password, dbname, port)
 
 	var err error
 
