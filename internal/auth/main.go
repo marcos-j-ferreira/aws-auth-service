@@ -5,13 +5,15 @@ import (
 	"net/http"
 	"sync"
 
+	"gorm.io/gorm"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct{
-	Username		 string	`json:"username" binding: "required"`
-	Password		 string	`json:"password" binding: "required"` 
+	gorm.Model
+	Username		 string	`gorm: "uniqueIndex;not null" json:"username" binding:"required"`
+	Password		 string	`gorm: "not null" json:"password" binding:"required"`
 }
 
 //In-memory storoge para user
@@ -26,13 +28,12 @@ func Register(c *gin.Context){
 		return
 	}
 
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	// 1 Verificar se o usuario já existe
-
-	if _, exists := users[input.Username]; exists {
+	var existingUser User
+	if err := DB.Where("username = ?", input.Username).First(&existingUser).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error":"Username already taken"})
+		return
+	}else if err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error":"Database error"})
 		return
 	}
 
@@ -48,7 +49,11 @@ func Register(c *gin.Context){
 		Password: string(hashedPassword),
 	}
 
-	users[input.Username] = newUser
+	if err := DB.Create(&newUser).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message":" Failed to create user"})
+		return
+	}
+	//c.JSON(http.StatusOK, gin.H{"message":"user registered successfuly"})
 	c.JSON(http.StatusCreated, gin.H{"message":"User registered successfully"})
 
 	// Test rápido
@@ -64,17 +69,17 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	mutex.RLock()
-	user, exists := users[input.Username]
-	mutex.RUnlock()
+	var user User
 
-	// Verifica se usuario existe
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error":"invalid credentials"})
+	if err := DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error":"Database error"})
+		}
 		return
 	}
 
-	// Compara a senha fornecida com a senha hashada
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error":"Invalid credentials"})
@@ -89,6 +94,4 @@ func Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": tokenString})
 
-	//curl -X POST http://localhost:8080/v1/register -H "Content-Type: application/json" -d '{"username":"testuser", "password":"testpassword"}'
 }
-

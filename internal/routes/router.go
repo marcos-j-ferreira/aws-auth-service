@@ -40,6 +40,8 @@ func SetupRouter() *gin.Engine {
 	router.GET("/ola", handler.HandlerOla)
 	router.GET("/deploy", handler.HandlerTesteDeploy)
 
+	
+	auth.Init_Connection_db()
 
 
 	// Rotas para autenticação
