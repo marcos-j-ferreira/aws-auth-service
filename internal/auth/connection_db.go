@@ -42,13 +42,19 @@ func Init_Connection_db() {
 	}
 
 	if err != nil {
-		log.Fatal("Failed to connect to database after multiple retries: ", err)
+		//log.Fatal("Failed to connect to database after multiple retries: ", err)
+
+		log.Printf("Failed to connect to database after multiple retries: %v", err)
+		return
 	}
 
 	// Migrar o esquema
 	err = DB.AutoMigrate(&User{})
 	if err != nil {
-		log.Fatal("Failed to auto migrate databases: ", err)
+		//log.Fatal("Failed to auto migrate databases: ", err)
+
+		log.Printf("Failed to connect to database after multiple retries: %v", err)
+		return
 	}
 
 	log.Println("\nDatabase connection and migration successfuly\n")
