@@ -25,13 +25,18 @@ func Init_Connection_db() {
 	password		:= os.Getenv("DB_PASSWORD")
 	dbname			:= os.Getenv("DB_NAME")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Sao_Paulo", host, user, password, dbname, port)
+	psqlInfo :=	 fmt.Sprintf(
+                "host=%s port=%s user=%s password=%s dbname=%s sslmode=require, TimeZone=America/Sao_Paulo", host, port, user, password, dbname,
+			)
+
+
+	//dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Sao_Paulo", host, user, password, dbname, port)
 
 	var err error
 
 	// Tentar conectar mais de algumas vezes, por validações
 	for i := 0; i < 5; i++ {
-		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		DB, err = gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
 
 		if err == nil {
 			break
