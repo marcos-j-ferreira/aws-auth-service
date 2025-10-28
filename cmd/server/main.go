@@ -5,6 +5,8 @@ import (
 	"ci/cd/internal/routes"
 	//"ci/cd/internal/handler"
 	"fmt"
+
+	"log"
 )
 
 
@@ -21,5 +23,5 @@ func main() {
 
 	fmt.Println("Servidor ouvindo na porta 8080...")
 
-	router.Run(":8080")
+	log.Fatal(router.Run(":8080"))
 }
