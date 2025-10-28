@@ -57,5 +57,5 @@ func Init_Connection_db() {
 		return
 	}
 
-	log.Println("\nDatabase connection and migration successfuly\n")
+	log.Println("Database connection and migration successfuly")
 } 
