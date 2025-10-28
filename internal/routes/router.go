@@ -40,12 +40,22 @@ func SetupRouter() *gin.Engine {
 	router.GET("/ola", handler.HandlerOla)
 	router.GET("/deploy", handler.HandlerTesteDeploy)
 
+
+
 	// Rotas para autenticação
 	auth_v1 := router.Group("v1")
 	{
 		auth_v1.POST("/register", auth.Register)
 		auth_v1.POST("/login", auth.Login)
 	}
+	//auth.TokenDefin()
+	protected := router.Group("protected")
+	protected.Use(auth.AuthMiddleware())
+	{
+		protected.GET("/profile", handler.Profile)
+	}
 
+
+	
 	return router
 }

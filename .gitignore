@@ -3,3 +3,4 @@
 .log
 /deploy
 .sum
+**/**.sh

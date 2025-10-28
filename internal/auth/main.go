@@ -9,7 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 type User struct{
 	Username		 string	`json:"username" binding: "required"`
 	Password		 string	`json:"password" binding: "required"` 
@@ -76,14 +75,20 @@ func Login(c *gin.Context) {
 	}
 
 	// Compara a senha fornecida com a senha hashada
-
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error":"Invalid credentials"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	tokenString, err := GenerateToken(user.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to geneate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": tokenString})
 
 	//curl -X POST http://localhost:8080/v1/register -H "Content-Type: application/json" -d '{"username":"testuser", "password":"testpassword"}'
 }
+
