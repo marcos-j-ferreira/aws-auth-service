@@ -6,7 +6,12 @@ import (
 	"github.com/gin-contrib/cors"
 	"time"
 
+	"github.com/joho/godotenv"
+	"os"
 	"ci/cd/internal/auth"
+	"fmt"
+
+	"strings"
 )
 
 func SetupRouter() *gin.Engine {
@@ -15,11 +20,27 @@ func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	//router.Use(gin.Recovery())
 
+	_ = godotenv.Load(".env")
+
+	ip := os.Getenv("IP_FRONT")
+	var ip2 string
+
+	if !strings.HasPrefix(ip, "http://") && !strings.HasPrefix(ip, "https://") {
+		
+		ip2 = fmt.Sprintf("http://%s:8080", ip)
+		ip = fmt.Sprintf("http://%s:80",ip)
+	}
+	//fmt.Println(ip, ip2)
+
 	// Configuração de CORS - somente para meu ip
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:		[]string{
 			"http://13.218.89.228",   		// EC2 - Front-end
 			"http://13.218.89.228:8080",     // EC2 - Front-end
+			"http://192.168.1.111:80",
+			"http://192.168.1.111:80/index.html",
+			ip,
+			ip2,
 
 			//"http://localhost",
 			//"http://localhost:8080",
