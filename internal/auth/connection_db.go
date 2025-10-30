@@ -27,7 +27,7 @@ func Init_Connection_db() {
 
 	//ssl			:= os.Getenv("DB_SSLMODE")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Sao_Paulo", host, user, password, dbname, port)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=America/Sao_Paulo", host, user, password, dbname, port)
 
 	var err error
 
