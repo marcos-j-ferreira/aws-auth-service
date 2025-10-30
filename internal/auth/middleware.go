@@ -7,7 +7,6 @@ import (
 	"net/http"
 )
 
-// authMiddleware é um middleware para verificar o token JWT
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
@@ -33,10 +32,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Adicionar o usernae ao contexto para uso posterior
 		c.Set("username", claims.Username)
 		c.Next()
 	}
 }
-
-// curl -H "Authorization: Bearer "token" "  localhost:8080/protected/profile

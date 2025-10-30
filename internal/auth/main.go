@@ -53,11 +53,7 @@ func Register(c *gin.Context){
 		c.JSON(http.StatusInternalServerError, gin.H{"message":" Failed to create user"})
 		return
 	}
-	//c.JSON(http.StatusOK, gin.H{"message":"user registered successfuly"})
 	c.JSON(http.StatusCreated, gin.H{"message":"User registered successfully"})
-
-	// Test rápido
-	//curl -X POST http://localhost:8080/v1/register -H "Content-Type: application/json" -d '{"username":"testuser", "password":"testpassword"}'
 
 }
 
