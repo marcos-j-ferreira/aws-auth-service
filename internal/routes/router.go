@@ -23,31 +23,35 @@ func SetupRouter() *gin.Engine {
 	_ = godotenv.Load(".env")
 
 	ip := os.Getenv("IP_FRONT")
-	var ip2 string
+	var (
+		ip2 			string
+		ip3 			string
+		ip4Register 	string
+		ip5Login 		string
+		ip6Users 		string
+	)
 
 	if !strings.HasPrefix(ip, "http://") && !strings.HasPrefix(ip, "https://") {
 		
-		ip2 = fmt.Sprintf("http://%s:8080", ip)
-		ip = fmt.Sprintf("http://%s:80",ip)
+		ip2 		= fmt.Sprintf("http://%s:8080", ip)
+		ip3 		= fmt.Sprintf("http://%s", ip)
+		ip4Register	= fmt.Sprintf("http://%s/login.html", ip)
+		ip5Login	= fmt.Sprintf("http://%s/register.html", ip)
+		ip6Users	= fmt.Sprintf("http://%s/users.html", ip)
+		ip 			= fmt.Sprintf("http://%s:80",ip)
+
 	}
 	//fmt.Println(ip, ip2)
-
 	// Configuração de CORS - somente para meu ip
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:		[]string{
-			"http://13.218.89.228",   		// EC2 - Front-end
-			"http://13.218.89.228:8080",     // EC2 - Front-end
-			"http://192.168.1.111:80",
-			"http://192.168.1.111:80/index.html",
+
 			ip,
 			ip2,
-
-			//"http://localhost",
-			//"http://localhost:8080",
-			//"http://192.168.1.111:80/index.html",
-			//"http://127.0.0.1:3000",    /// unica que funcionou
-			//"http://192.168.1.111:5500", 
- 			//"http://192.168.1.111:3000",  
+			ip3,
+			ip4Register,
+			ip5Login,
+			ip6Users,
 			 },
 		AllowMethods:		[]string{"GET","POST","PUT","DELETE", "OPTIONS"},
 		AllowHeaders:		[]string{"Origin", "Content-Type", "Authorization"},
@@ -70,12 +74,15 @@ func SetupRouter() *gin.Engine {
 	{
 		auth_v1.POST("/register", auth.Register)
 		auth_v1.POST("/login", auth.Login)
+
+		auth_v1.GET("/users", auth.GetAllUsers)
 	}
 	//auth.TokenDefin()
 	protected := router.Group("protected")
-	protected.Use(auth.AuthMiddleware())
+	protected.Use(auth.AuthMiddleware())	
 	{
 		protected.GET("/profile", handler.Profile)
+		protected.GET("/users", auth.GetAllUsers)
 	}
 
 

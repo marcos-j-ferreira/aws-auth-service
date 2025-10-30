@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+
+	"time"
 )
 
 type User struct{
@@ -90,4 +92,34 @@ func Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": tokenString})
 
+}
+
+// Retornar todas os usuarios;
+
+type UserResponse struct {
+	ID 			uint		`json:"id" gorm:"primaryKey"`
+	Username	string		`json:"username"`
+	CreatedAt	time.Time	`json:"created_at"`	
+}
+
+func GetAllUsers(c *gin.Context) {
+	var users 		[]User
+	var response 	[]UserResponse
+
+	if err := DB.Select("username", "created_at").Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error":"Database error"})
+		return
+	}
+
+	for _, u := range users {
+		response = append(response, UserResponse{
+			ID:			u.ID,
+			Username:	u.Username,
+			CreatedAt:	u.CreatedAt,
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"count":len(response),
+		"users": response,
+	})
 }

@@ -6,3 +6,5 @@
 **/**.sh
 Makefile
 go.sum
+.txt
+ips.txt
