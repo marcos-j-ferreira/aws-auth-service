@@ -75,7 +75,7 @@ func SetupRouter() *gin.Engine {
 		auth_v1.POST("/register", auth.Register)
 		auth_v1.POST("/login", auth.Login)
 
-		auth_v1.GET("/users", auth.GetAllUsers)
+		//auth_v1.GET("/users", auth.GetAllUsers)
 	}
 	//auth.TokenDefin()
 	protected := router.Group("protected")
@@ -83,6 +83,11 @@ func SetupRouter() *gin.Engine {
 	{
 		protected.GET("/profile", handler.Profile)
 		protected.GET("/users", auth.GetAllUsers)
+	}
+
+	users := router.Group("users")
+	{
+		users.GET("/", auth.GetAllUsers)
 	}
 
 
